@@ -62,13 +62,15 @@ if __name__=="__main__":
             if not ret:
                 break
 
+            frame = cv2.resize(frame,(1920,1080))
+
             # calculate the frame timestamp
             frame_timestamp = start_time + datetime.timedelta(milliseconds=cap.get(cv2.CAP_PROP_POS_MSEC))
-            frame_unixtimestamp = (frame_timestamp - datetime.datetime(1970, 1, 1, tzinfo=pytz.UTC)) / datetime.timedelta(seconds=1) + 7*3600
+            frame_unixtimestamp = (frame_timestamp - datetime.datetime(1970, 1, 1, tzinfo=pytz.UTC)) / datetime.timedelta(seconds=1) + 7*3600 # should not have to add UTC here...hmm
 
             # Get depth from timestamp
             if lrauv_data is not None:
-                query_string = str(frame_unixtimestamp - 0.5) + ' <= unixtime < ' + str(frame_unixtimestamp + 0.5)
+                query_string = str(frame_unixtimestamp - 0.5) + ' <= unixtime < ' + str(frame_unixtimestamp + 0.5) # A hacky way to find matching time with 1 s window
                 rows = lrauv_data.query(query_string)
                 output_text = str(frame_timestamp) + ': Depth ' + str(np.mean(rows['depth'])) + ' m'
                 cv2.putText(frame, output_text, org, font, font_scale, color, thickness, cv2.LINE_AA)
